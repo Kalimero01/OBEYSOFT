@@ -1,0 +1,236 @@
+{
+  "info": {
+    "_postman_id": "a2e1b3c8-6f1a-4f8b-9b9b-obeyst-postman-col",
+    "name": "OBEYSOFT Local API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "OBEYSOFT – Local Swagger: http://localhost:5052/swagger/index.html"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/Auth/register",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "Auth", "register" ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"dev.user+1@obeysoft.local\",\n  \"displayName\": \"Dev User\",\n  \"password\": \"Dev1234!\"\n}"
+            },
+            "description": "Yeni kullanýcý oluþturur ve JWT döner."
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "let token = null;",
+                  "try {",
+                  "  const body = pm.response.json();",
+                  "  token = body.token || body.accessToken || body.jwt || (body.value && body.value.token);",
+                  "} catch(e) {}",
+                  "if (token) {",
+                  "  pm.collectionVariables.set('token', token);",
+                  "  pm.test('JWT token alýndý', function(){ pm.expect(!!token).to.be.true; });",
+                  "} else {",
+                  "  pm.test('Login cevabýnda token bulunamadý', function(){ pm.expect.fail('Token alaný bulunamadý'); });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/Auth/login",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "Auth", "login" ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"dev.user+1@obeysoft.local\",\n  \"password\": \"Dev1234!\"\n}"
+            },
+            "description": "Login olur; test script’i jwt’yi {{token}} deðiþkenine yazar."
+          },
+          "response": []
+        },
+        {
+          "name": "Me (requires Bearer)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/Auth/me",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "Auth", "me" ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Categories",
+      "item": [
+        {
+          "name": "Get Active",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/Categories/active",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "Categories", "active" ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Tree",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/Categories/tree",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "Categories", "tree" ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Children (by parentId)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/Categories/{{parentId}}/children",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "Categories", "{{parentId}}", "children" ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Posts",
+      "item": [
+        {
+          "name": "Get Published List (paged + filter)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/Posts?Page=1&PageSize=10&CategorySlug=aspnet-core&Search=ef",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "Posts" ],
+              "query": [
+                {
+                  "key": "Page",
+                  "value": "1"
+                },
+                {
+                  "key": "PageSize",
+                  "value": "10"
+                },
+                {
+                  "key": "CategorySlug",
+                  "value": "aspnet-core"
+                },
+                {
+                  "key": "Search",
+                  "value": "ef"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Post by Slug",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/Posts/aspnet-core-ile-katmanli-mimari",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "Posts", "aspnet-core-ile-katmanli-mimari" ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Comments (requires Bearer)",
+      "item": [
+        {
+          "name": "Create Comment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/Comments",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "Comments" ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"postId\": \"bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb1\",\n  \"parentId\": null,\n  \"content\": \"Bu ders harika, teþekkürler!\"\n}"
+            },
+            "description": "Seeder’daki ilk post GUID: bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb1 (örnek). Gerekirse Post detail’den gerçek GUID’i al."
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5052"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "parentId",
+      "value": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1"
+    }
+  ]
+}

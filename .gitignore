@@ -1,0 +1,55 @@
+# FILE: .gitignore (OBEYSOFT çözüm kökü)
+
+## Build output
+bin/
+obj/
+out/
+artifacts/
+
+## VS / Rider
+.vs/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+## Logs
+*.log
+logs/
+
+## Transient
+*.tmp
+*.temp
+*.DS_Store
+Thumbs.db
+
+## NuGet
+*.nupkg
+*.snupkg
+packages/
+.nuget/
+project.lock.json
+
+## Resharper / Analyzer
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+
+## Coverage / Test
+TestResults/
+coverage/
+*.coverage
+*.coveragexml
+*.trx
+
+## Publish
+publish/
+*.Publish.xml
+
+## Secrets (örn: user-specific launch ayarlarý)
+*.csproj.user
+
+## Optional: ortam deðiþkenleri dosyalarý
+.env
+.env.*
