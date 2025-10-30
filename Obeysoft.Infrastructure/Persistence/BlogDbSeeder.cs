@@ -5,14 +5,19 @@ using Obeysoft.Domain.Categories;
 using Obeysoft.Domain.Comments;
 using Obeysoft.Domain.Posts;
 using Obeysoft.Domain.Users;
+using System;
+using System.Security.Cryptography;
 
 namespace Obeysoft.Infrastructure.Persistence
 {
     /// <summary>
     /// Uygulama açılırken (Program.cs içinde) çağrılır.
     /// Amaç: Boş veritabanını ilk demo verileriyle doldurmak.
-    /// Domain entity'lerinin PRIVATE ctor'larına takılmamak için
-    /// HER ŞEYİ domain'in kendi factory metotlarıyla oluşturuyoruz.
+    /// - Admin bilgisi önce ortam değişkenlerinden okunur:
+    ///     OBEYSOFT_ADMIN_EMAIL
+    ///     OBEYSOFT_ADMIN_PASSWORD
+    ///     OBEYSOFT_ADMIN_DISPLAYNAME
+    /// - Yoksa varsayılan admin: admin@obeysoft.local / Admin1234!
     /// </summary>
     public static class BlogDbSeeder
     {
@@ -22,29 +27,53 @@ namespace Obeysoft.Infrastructure.Persistence
             await db.Database.EnsureCreatedAsync();
 
             // -------------------------------------------------
+            // 0) Ortamdan admin bilgilerini oku
+            // -------------------------------------------------
+            var envAdminEmail = Environment.GetEnvironmentVariable("OBEYSOFT_ADMIN_EMAIL");
+            var envAdminPassword = Environment.GetEnvironmentVariable("OBEYSOFT_ADMIN_PASSWORD");
+            var envAdminDisplayName = Environment.GetEnvironmentVariable("OBEYSOFT_ADMIN_DISPLAYNAME");
+
+            var adminEmail = string.IsNullOrWhiteSpace(envAdminEmail)
+                ? "admin@obeysoft.local"
+                : envAdminEmail.Trim().ToLowerInvariant();
+
+            var adminDisplayName = string.IsNullOrWhiteSpace(envAdminDisplayName)
+                ? "Super Admin"
+                : envAdminDisplayName;
+
+            var adminPassword = string.IsNullOrWhiteSpace(envAdminPassword)
+                ? "Admin1234!"
+                : envAdminPassword;
+
+            // -------------------------------------------------
             // 1) KULLANICI
             // -------------------------------------------------
-            // Domain.User'da public ctor yok, sadece factory var:
-            // User.CreateNew(string email, string displayName, UserRole role = Member, bool isActive = true)
-            User? adminUser = await db.Users.FirstOrDefaultAsync(u => u.Email == "admin@obeysoft.local");
+            var adminUser = await db.Users.FirstOrDefaultAsync(u => u.Email == adminEmail);
             if (adminUser is null)
             {
+                // DDD'ye uygun: factory ile yarat
                 adminUser = User.CreateNew(
-                    email: "admin@obeysoft.local",
-                    displayName: "Super Admin",
+                    email: adminEmail,
+                    displayName: adminDisplayName,
                     role: UserRole.Admin,
                     isActive: true
                 );
 
+                // şifre üret (AuthService'tekiyle aynı mantık)
+                var (hash, salt) = HashPassword(adminPassword);
+                adminUser.SetPasswordSecret(hash, salt);
+
                 db.Users.Add(adminUser);
-                logger.LogInformation("Seed → admin@obeysoft.local eklendi (rol=Admin).");
+                logger.LogInformation("Seed → {Email} eklendi (rol=Admin).", adminEmail);
+            }
+            else
+            {
+                logger.LogInformation("Seed → {Email} zaten var, yeniden eklenmedi.", adminEmail);
             }
 
             // -------------------------------------------------
             // 2) KATEGORİLER
             // -------------------------------------------------
-            // Domain.Category'de de public ctor yok;
-            // Category.CreateRoot(...) ve Category.CreateChild(...) var.
             if (!await db.Categories.AnyAsync())
             {
                 var catRoot = Category.CreateRoot(
@@ -85,8 +114,6 @@ namespace Obeysoft.Infrastructure.Persistence
             // -------------------------------------------------
             // 3) POSTLAR
             // -------------------------------------------------
-            // Domain.Post’ta da public ctor yok;
-            // Post.CreateDraft(string title, string slug, string content, Guid categoryId, string? summary = null, bool isActive = true)
             if (!await db.Posts.AnyAsync())
             {
                 var post1 = Post.CreateDraft(
@@ -107,7 +134,7 @@ namespace Obeysoft.Infrastructure.Persistence
                     isActive: true
                 );
 
-                // Bu ikisini direkt yayımlayalım
+                // direkt yayımlayalım
                 post1.Publish();
                 post2.Publish();
 
@@ -117,17 +144,13 @@ namespace Obeysoft.Infrastructure.Persistence
                 // -------------------------------------------------
                 // 4) YORUM
                 // -------------------------------------------------
-                // Domain.Comment: Comment.Create(Guid postId, Guid authorId, string content, Guid? parentId = null, bool isActive = true)
-                // Burada authorId olarak biraz önce oluşturduğumuz adminUser.Id'yi kullanıyoruz.
                 var comment = Comment.Create(
                     postId: post1.Id,
-                    authorId: adminUser.Id,
+                    authorId: adminUser!.Id,
                     content: "Canlıda ilk yorum 👋",
                     parentId: null,
                     isActive: true
                 );
-                // Yorumlar varsayılan olarak IsApproved=false geliyor;
-                // ama seeder'da direkt onaylı olsun:
                 comment.Approve();
 
                 db.Comments.Add(comment);
@@ -139,6 +162,25 @@ namespace Obeysoft.Infrastructure.Persistence
             // -------------------------------------------------
             await db.SaveChangesAsync();
             logger.LogInformation("Seed → tamamlandı.");
+        }
+
+        // AuthService'teki private PasswordHasher'ın kopyası (min)
+        private static (string hash, string salt) HashPassword(string password)
+        {
+            if (string.IsNullOrWhiteSpace(password))
+                throw new ArgumentException("Parola boş olamaz.", nameof(password));
+
+            const int SaltSize = 32;
+            const int HashSize = 32;
+            const int Iterations = 100_000;
+
+            Span<byte> salt = stackalloc byte[SaltSize];
+            RandomNumberGenerator.Fill(salt);
+
+            using var pbkdf2 = new Rfc2898DeriveBytes(password, salt.ToArray(), Iterations, HashAlgorithmName.SHA256);
+            var hash = pbkdf2.GetBytes(HashSize);
+
+            return (Convert.ToBase64String(hash), Convert.ToBase64String(salt.ToArray()));
         }
     }
 }
