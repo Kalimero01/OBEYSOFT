@@ -1,9 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿// FILE: Obeysoft.Infrastructure/DependencyInjection.cs
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Obeysoft.Infrastructure.Persistence;
 
-// Domain arayüzleri (sende Domain altında)
+// Domain arayüzleri
 using Obeysoft.Domain.Comments;
 
 // Infrastructure implementasyonları
@@ -45,11 +46,15 @@ namespace Obeysoft.Infrastructure
             // Auth
             services.AddScoped<IAuthService, AuthService>();
 
-            // Post & Category (sende implementasyonlar Infrastructure klasöründe)
+            // Post okumalar
             services.AddScoped<IGetPostService, GetPostService>();
+            // Post yönetimi (YENİ)
+            services.AddScoped<IManagePostService, ManagePostService>();
+
+            // Category
             services.AddScoped<IGetCategoryService, GetCategoryService>();
 
-            // Comments (Application servis arayüzü)
+            // Comments
             services.AddScoped<ICreateCommentService, CreateCommentService>();
 
             return services;
