@@ -1,10 +1,9 @@
-﻿// FILE: Obeysoft.Api/Program.cs
-using FluentValidation;
+﻿using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using Obeysoft.Api.Middlewares;          // 🔹 ExceptionHandlingMiddleware
+using Obeysoft.Api.Middlewares;
 using Obeysoft.Application.Comments;
 using Obeysoft.Infrastructure;
 using Obeysoft.Infrastructure.Persistence;
@@ -12,8 +11,22 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 🔒 Geliştirmede sabit port: Swagger linkin hep aynı kalsın
-builder.WebHost.UseUrls("http://localhost:5052");
+// ---------------------------------------------------------------------
+// 1) PORT AYARI
+// Render üretimde PORT env veriyor (mesela 10000).
+// Lokal geliştirirken 5052 kullanmak istiyoruz.
+// ---------------------------------------------------------------------
+var portFromEnv = Environment.GetEnvironmentVariable("PORT");
+if (!string.IsNullOrWhiteSpace(portFromEnv))
+{
+    // Render / container yolu → 0.0.0.0:PORT
+    builder.WebHost.UseUrls($"http://0.0.0.0:{portFromEnv}");
+}
+else
+{
+    // Lokal yol → hep 5052
+    builder.WebHost.UseUrls("http://localhost:5052");
+}
 
 // -------- Services --------
 var configuration = builder.Configuration;
@@ -25,6 +38,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Obeysoft API", Version = "v1" });
+
     var jwtScheme = new OpenApiSecurityScheme
     {
         Name = "Authorization",
@@ -35,6 +49,7 @@ builder.Services.AddSwaggerGen(c =>
         BearerFormat = "JWT",
         Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
     };
+
     c.AddSecurityDefinition("Bearer", jwtScheme);
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
@@ -79,7 +94,8 @@ builder.Services
     })
     .AddJwtBearer(options =>
     {
-        options.RequireHttpsMetadata = false; // DEV ortamı
+        // Render HTTPS sonlandırmayı kendisi yapıyor, biz HTTP dinliyoruz.
+        options.RequireHttpsMetadata = false;
         options.SaveToken = true;
         options.TokenValidationParameters = new TokenValidationParameters
         {
@@ -102,7 +118,7 @@ var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI();
 
-// Global hata yakalama (en başlara yakın konumlandır)
+// Global hata yakalama
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.UseCors("Default");
@@ -123,7 +139,7 @@ using (var scope = app.Services.CreateScope())
         var automigrate = configuration.GetSection("Database").GetValue<bool>("Automigrate");
         if (automigrate)
         {
-            await db.Database.EnsureCreatedAsync(); // idempotent
+            await db.Database.EnsureCreatedAsync();
             await db.Database.MigrateAsync();
             logger.LogInformation("✅ Database migrated.");
         }
