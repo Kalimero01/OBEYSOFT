@@ -1,4 +1,4 @@
-﻿# FILE: Dockerfile
+# FILE: Dockerfile
 # 1️⃣ Build aşaması
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
@@ -22,6 +22,11 @@ RUN dotnet publish "./Obeysoft.Api/Obeysoft.Api.csproj" -c Release -o /app/publi
 # 2️⃣ Run aşaması
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
+
+# Health check aracı (curl)
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends curl \
+    && rm -rf /var/lib/apt/lists/*
 
 # Ortam değişkeni (Production)
 ENV ASPNETCORE_ENVIRONMENT=Production
