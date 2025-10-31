@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -32,7 +32,7 @@ namespace Obeysoft.Infrastructure.Posts
             var q =
                 from p in _db.Posts.AsNoTracking()
                 join c in _db.Categories.AsNoTracking() on p.CategoryId equals c.Id
-                where p.IsActive && p.IsPublished && c.IsActive
+                where p.IsActive && !p.IsDeleted && p.IsPublished && c.IsActive
                 select new
                 {
                     p.Id,
@@ -91,7 +91,7 @@ namespace Obeysoft.Infrastructure.Posts
             var q =
                 from p in _db.Posts.AsNoTracking()
                 join c in _db.Categories.AsNoTracking() on p.CategoryId equals c.Id
-                where p.IsActive && c.IsActive && p.Slug == slug
+                where p.IsActive && !p.IsDeleted && c.IsActive && p.Slug == slug
                 select new GetPostDetailDto
                 {
                     Id = p.Id,

@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -115,8 +115,12 @@ builder.Services.AddAuthorization();
 var app = builder.Build();
 
 // -------- Pipeline --------
-app.UseSwagger();
-app.UseSwaggerUI();
+var swaggerEnabled = configuration.GetValue<bool?>("Swagger:Enabled") ?? true;
+if (swaggerEnabled)
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
 // Global hata yakalama
 app.UseMiddleware<ExceptionHandlingMiddleware>();
@@ -127,6 +131,8 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapGet("/health", () => Results.Ok(new { status = "healthy" }));
 
 // ---- Otomatik migrate + opsiyonel seed ----
 using (var scope = app.Services.CreateScope())
