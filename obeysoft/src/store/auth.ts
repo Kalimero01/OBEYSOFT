@@ -3,6 +3,7 @@ import { create } from "zustand";
 import {
   loginRequest,
   meRequest,
+  registerRequest,
   tokenStorage,
   type Me
 } from "../lib/api";
@@ -13,6 +14,7 @@ type AuthState = {
   user: Me | null;
   status: AuthStatus;
   error?: string | null;
+  register: (email: string, displayName: string, password: string) => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   check: () => Promise<void>;
@@ -23,6 +25,19 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   status: "idle",
   error: null,
+  async register(email, displayName, password) {
+    set({ status: "loading", error: null });
+    try {
+      const { token } = await registerRequest(email, displayName, password);
+      tokenStorage.set(token);
+      const me = await meRequest();
+      set({ user: me, status: "authenticated", error: null });
+    } catch (error: any) {
+      tokenStorage.clear();
+      set({ status: "error", error: error?.message ?? "Kayıt başarısız" });
+      throw error;
+    }
+  },
   async login(email, password) {
     set({ status: "loading", error: null });
     try {

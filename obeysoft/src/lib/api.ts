@@ -117,6 +117,12 @@ export type NavigationItemRow = {
   parentName?: string | null;
 };
 
+export async function registerRequest(email: string, displayName: string, password: string) {
+  const { data } = await api.post("/Auth/register", { email, displayName, password });
+  const token = (data?.accessToken ?? data?.AccessToken ?? data?.token) as string;
+  return { token };
+}
+
 export async function loginRequest(email: string, password: string) {
   const { data } = await api.post("/Auth/login", { email, password });
   const token = (data?.accessToken ?? data?.AccessToken ?? data?.token) as string;

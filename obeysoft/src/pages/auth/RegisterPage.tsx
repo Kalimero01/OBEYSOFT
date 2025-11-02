@@ -7,10 +7,11 @@ import { Input } from "../../components/ui/Input";
 import { Label } from "../../components/ui/Label";
 import { useAuthStore } from "../../store/auth";
 
-export function LoginPage() {
+export function RegisterPage() {
   const navigate = useNavigate();
-  const login = useAuthStore((state) => state.login);
+  const register = useAuthStore((state) => state.register);
   const [email, setEmail] = useState("");
+  const [displayName, setDisplayName] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -20,10 +21,10 @@ export function LoginPage() {
     setBusy(true);
     setError(null);
     try {
-      await login(email, password);
-      navigate("/admin/dashboard", { replace: true });
+      await register(email, displayName, password);
+      navigate("/", { replace: true });
     } catch (err: any) {
-      setError(err?.message ?? "Giriş başarısız");
+      setError(err?.message ?? "Kayıt başarısız");
     } finally {
       setBusy(false);
     }
@@ -34,8 +35,8 @@ export function LoginPage() {
       <Card className="w-full max-w-sm border border-border/70 bg-card/80">
         <CardContent className="space-y-5 p-6">
           <div>
-            <h1 className="text-2xl font-semibold text-foreground">Giriş Yap</h1>
-            <p className="text-sm text-muted-foreground">Hesabınıza giriş yapın.</p>
+            <h1 className="text-2xl font-semibold text-foreground">Hesap Oluştur</h1>
+            <p className="text-sm text-muted-foreground">Hemen kayıt olun ve blog yazılarını okuyun.</p>
           </div>
           {error && (
             <div className="rounded-2xl border border-destructive/50 bg-destructive/10 px-3 py-2 text-sm text-destructive">
@@ -43,6 +44,16 @@ export function LoginPage() {
             </div>
           )}
           <form className="space-y-4" onSubmit={submit}>
+            <div className="space-y-2">
+              <Label htmlFor="displayName">Ad Soyad</Label>
+              <Input
+                id="displayName"
+                type="text"
+                value={displayName}
+                onChange={(event) => setDisplayName(event.currentTarget.value)}
+                required
+              />
+            </div>
             <div className="space-y-2">
               <Label htmlFor="email">E-posta</Label>
               <Input
@@ -59,20 +70,20 @@ export function LoginPage() {
               <Input
                 id="password"
                 type="password"
-                autoComplete="current-password"
+                autoComplete="new-password"
                 value={password}
                 onChange={(event) => setPassword(event.currentTarget.value)}
                 required
               />
             </div>
             <Button type="submit" disabled={busy} className="w-full">
-              {busy ? "Giriş yapılıyor..." : "Giriş Yap"}
+              {busy ? "Kaydediliyor..." : "Kayıt Ol"}
             </Button>
           </form>
           <div className="text-center text-sm text-muted-foreground">
-            Hesabınız yok mu?{" "}
-            <Link to="/register" className="font-medium text-primary hover:underline">
-              Kayıt olun
+            Zaten hesabınız var mı?{" "}
+            <Link to="/login" className="font-medium text-primary hover:underline">
+              Giriş yapın
             </Link>
           </div>
         </CardContent>
@@ -80,5 +91,4 @@ export function LoginPage() {
     </div>
   );
 }
-
 

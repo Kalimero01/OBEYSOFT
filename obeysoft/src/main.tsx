@@ -7,6 +7,7 @@ import App from "./App";
 import { AdminLayout } from "./layouts/AdminLayout";
 import { PublicLayout } from "./layouts/PublicLayout";
 import { LoginPage } from "./pages/auth/LoginPage";
+import { RegisterPage } from "./pages/auth/RegisterPage";
 import { CategoriesPage } from "./pages/admin/CategoriesPage";
 import { CommentsPage } from "./pages/admin/CommentsPage";
 import { DashboardPage } from "./pages/admin/DashboardPage";
@@ -30,6 +31,7 @@ const guard = () => {
 
 const router = createBrowserRouter([
   { path: "/login", element: <LoginPage /> },
+  { path: "/register", element: <RegisterPage /> },
   {
     path: "/",
     element: <PublicLayout />,

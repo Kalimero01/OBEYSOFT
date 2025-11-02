@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, Outlet, useLocation } from "react-router-dom";
-import { LayoutDashboard, LogIn, Menu, Sparkles } from "lucide-react";
+import { LayoutDashboard, Menu, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
 
 import { Button } from "../components/ui/Button";
@@ -76,11 +76,14 @@ export function PublicLayout() {
                 </Link>
               </Button>
             ) : (
-              <Button size="sm" variant="ghost" asChild>
-                <Link to="/login">
-                  <LogIn size={16} className="mr-2" /> Admin
-                </Link>
-              </Button>
+              <>
+                <Button size="sm" variant="ghost" asChild>
+                  <Link to="/login">Giriş</Link>
+                </Button>
+                <Button size="sm" asChild>
+                  <Link to="/register">Kayıt Ol</Link>
+                </Button>
+              </>
             )}
           </div>
         </div>
@@ -103,9 +106,14 @@ export function PublicLayout() {
                     <Link to="/admin/dashboard">Panel</Link>
                   </Button>
                 ) : (
-                  <Button className="flex-1" variant="ghost" asChild>
-                    <Link to="/login">Admin</Link>
-                  </Button>
+                  <>
+                    <Button className="flex-1" variant="ghost" asChild>
+                      <Link to="/login">Giriş</Link>
+                    </Button>
+                    <Button className="flex-1" asChild>
+                      <Link to="/register">Kayıt Ol</Link>
+                    </Button>
+                  </>
                 )}
               </div>
             </div>
