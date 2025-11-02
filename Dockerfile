@@ -23,8 +23,8 @@ RUN dotnet publish "./Obeysoft.Api/Obeysoft.Api.csproj" -c Release -o /app/publi
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
 
-# Ortam değişkeni (Production)
-ENV ASPNETCORE_ENVIRONMENT=Production
+# Ortam değişkeni (Render settings use Render environment)
+ENV ASPNETCORE_ENVIRONMENT=Render
 
 COPY --from=build /app/publish .
 
