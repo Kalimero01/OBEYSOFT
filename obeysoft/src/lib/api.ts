@@ -3,8 +3,11 @@ import axios from "axios";
 const BASE_URL = (import.meta as any).env?.VITE_API_BASE_URL || "http://localhost:5052";
 const TOKEN_KEY = "access_token";
 
+// Ensure BASE_URL doesn't end with / to avoid double slashes
+const normalizedBaseUrl = BASE_URL.endsWith("/") ? BASE_URL.slice(0, -1) : BASE_URL;
+
 export const api = axios.create({
-  baseURL: `${BASE_URL}/api`,
+  baseURL: `${normalizedBaseUrl}/api`,
   timeout: 25000
 });
 
