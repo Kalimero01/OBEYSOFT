@@ -141,12 +141,18 @@ using (var scope = app.Services.CreateScope())
 
     try
     {
+        var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Unknown";
+        logger.LogInformation($"🔧 Environment: {environment}");
+        
         var automigrate = configuration.GetSection("Database").GetValue<bool>("Automigrate");
         var recreateOnModelChange = configuration.GetSection("Database").GetValue<bool>("RecreateOnModelChange");
+        logger.LogInformation($"🔧 Automigrate: {automigrate}, RecreateOnModelChange: {recreateOnModelChange}");
+        
         if (automigrate)
         {
             try
             {
+                logger.LogInformation("🔄 Starting database migration...");
                 await db.Database.MigrateAsync();
                 logger.LogInformation("✅ Database migrated.");
             }
@@ -158,6 +164,10 @@ using (var scope = app.Services.CreateScope())
                 logger.LogInformation("✅ Database recreated and migrated.");
             }
         }
+        else
+        {
+            logger.LogWarning("⚠️ Automigrate is disabled!");
+        }
 
         var seed = configuration.GetSection("Database").GetValue<bool>("Seed");
         if (seed)
@@ -167,7 +177,7 @@ using (var scope = app.Services.CreateScope())
     }
     catch (Exception ex)
     {
-        logger.LogWarning(ex, "DB migrate/seed sırasında hata; API ayakta kalmaya devam ediyor.");
+        logger.LogError(ex, "❌ DB migrate/seed sırasında hata; API ayakta kalmaya devam ediyor.");
     }
 }
 

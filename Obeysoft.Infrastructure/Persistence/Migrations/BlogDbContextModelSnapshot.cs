@@ -328,9 +328,7 @@ namespace Obeysoft.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
-
 #pragma warning restore 612, 618
         }
     }
 }
-
