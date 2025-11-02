@@ -1,0 +1,68 @@
+# Build output
+bin/
+obj/
+out/
+artifacts/
+
+# VS / Rider
+.vs/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Logs
+*.log
+logs/
+
+# Transient
+*.tmp
+*.temp
+*.DS_Store
+Thumbs.db
+
+# NuGet
+*.nupkg
+*.snupkg
+packages/
+.nuget/
+project.lock.json
+
+# Resharper / Analyzer
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+
+# Coverage / Test
+TestResults/
+coverage/
+*.coverage
+*.coveragexml
+*.trx
+
+# Publish
+publish/
+*.Publish.xml
+
+# Secrets
+*.csproj.user
+
+# Environment variables
+.env
+.env.*
+
+# Node.js
+node_modules/
+dist/
+tsconfig.tsbuildinfo
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# IDE / Editor
+.vscode/
+*.swp
+*.swo
+*~
