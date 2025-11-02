@@ -1,5 +1,5 @@
-import { useMemo, useState, type ReactNode } from "react";
-import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import { useMemo, useState } from "react";
+import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
   FileText,
   Folder,
@@ -34,7 +34,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: "Kullanıcılar", to: "/admin/users", icon: <Users size={18} />, roles: ["Admin"] }
 ];
 
-export function AdminLayout({ children }: { children?: ReactNode }) {
+export function AdminLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
@@ -134,7 +134,7 @@ export function AdminLayout({ children }: { children?: ReactNode }) {
           </header>
 
           <main className="flex-1 bg-background/40 pb-12">
-            <div className="mx-auto w-full max-w-6xl px-4 py-8">{children}</div>
+            <div className="mx-auto w-full max-w-6xl px-4 py-8"><Outlet /></div>
           </main>
         </div>
       </div>
