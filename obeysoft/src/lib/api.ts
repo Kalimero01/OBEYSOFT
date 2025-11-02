@@ -141,8 +141,13 @@ export async function meRequest(): Promise<Me> {
 }
 
 export async function getCategories(): Promise<Category[]> {
-  const { data } = await api.get("/Categories/active");
-  return data ?? [];
+  try {
+    const { data } = await api.get("/Categories/active");
+    return data ?? [];
+  } catch (error: any) {
+    console.error("Failed to fetch categories:", error);
+    return [];
+  }
 }
 
 export async function getPosts(params: {
@@ -151,18 +156,30 @@ export async function getPosts(params: {
   category?: string;
   search?: string;
 }): Promise<Paginated<PostListItem>> {
-  const { data } = await api.get("/Posts", { params });
-  return {
-    items: data?.items ?? [],
-    page: data?.page ?? params.page,
-    pageSize: data?.pageSize ?? params.pageSize,
-    totalCount: data?.totalCount ?? data?.total ?? (data?.items?.length ?? 0),
-    totalPages: data?.totalPages ?? 1
-  };
+  try {
+    const { data } = await api.get("/Posts", { params });
+    return {
+      items: data?.items ?? [],
+      page: data?.page ?? params.page,
+      pageSize: data?.pageSize ?? params.pageSize,
+      totalCount: data?.totalCount ?? data?.total ?? (data?.items?.length ?? 0),
+      totalPages: data?.totalPages ?? 1
+    };
+  } catch (error: any) {
+    console.error("Failed to fetch posts:", error);
+    return {
+      items: [],
+      page: params.page,
+      pageSize: params.pageSize,
+      totalCount: 0,
+      totalPages: 1
+    };
+  }
 }
 
 export async function getPostDetail(slug: string): Promise<PostDetail> {
   const { data } = await api.get(`/Posts/${slug}`);
+  if (!data) throw new Error("Post not found");
   return data;
 }
 
