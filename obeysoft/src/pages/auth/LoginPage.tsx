@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import { Button } from "../../components/ui/Button";
 import { Card, CardContent } from "../../components/ui/Card";
@@ -7,6 +8,7 @@ import { Label } from "../../components/ui/Label";
 import { useAuthStore } from "../../store/auth";
 
 export function LoginPage() {
+  const navigate = useNavigate();
   const login = useAuthStore((state) => state.login);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -19,7 +21,7 @@ export function LoginPage() {
     setError(null);
     try {
       await login(email, password);
-      window.location.href = "/admin/dashboard";
+      navigate("/admin/dashboard", { replace: true });
     } catch (err: any) {
       setError(err?.message ?? "Giriş başarısız");
     } finally {
