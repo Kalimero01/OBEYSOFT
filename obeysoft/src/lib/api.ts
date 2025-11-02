@@ -3,6 +3,9 @@ import axios from "axios";
 const BASE_URL = (import.meta as any).env?.VITE_API_BASE_URL || "http://localhost:5052";
 const TOKEN_KEY = "access_token";
 
+// Debug: API URL'i console'a yazdır
+console.log("API BASE_URL:", BASE_URL);
+
 export const api = axios.create({
   baseURL: `${BASE_URL}/api`,
   timeout: 25000
